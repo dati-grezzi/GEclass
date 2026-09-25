@@ -686,14 +686,13 @@
       60% { transform: scale(1.14); }
       100% { transform: scale(1); opacity: 1; }
     }
-    .slot-meta {
-      min-height: 30px;
-      margin-top: 10px;
+    .slot-avatar-wrap {
+      min-height: 40px;
+      margin-top: 12px;
       display: flex;
-      gap: 6px;
       justify-content: center;
       align-items: center;
-      flex-wrap: wrap;
+      animation: slotPop 0.4s ease;
     }
     .slot-actions {
       display: flex;
@@ -729,13 +728,16 @@
       margin-top: 16px;
     }
     .slot-done-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
       font-family: 'Zilla Slab', serif;
       font-weight: 700;
       font-size: 15px;
       color: var(--paper);
       background: #384252;
       border-radius: 8px;
-      padding: 4px 11px;
+      padding: 3px 11px 3px 5px;
     }
     .sound-toggle {
       display: inline-flex;
@@ -804,6 +806,11 @@
       margin-bottom: 16px;
       animation: slotPop 0.35s ease;
     }
+    .lav-avatar-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 4px;
+    }
     .lav-current-id {
       font-family: 'Zilla Slab', serif;
       font-weight: 700;
@@ -868,6 +875,35 @@
       font-family: inherit;
       font-size: 13px;
       font-weight: 600;
+      cursor: pointer;
+    }
+    .lav-precheck {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .lav-precheck .btn {
+      flex: 1;
+      width: auto;
+    }
+    .lav-absent-btn {
+      background: transparent;
+      color: var(--ink-soft);
+      border: 1.5px solid var(--rule);
+    }
+    .lav-absent-btn:hover {
+      border-color: var(--ink-soft);
+    }
+    .lav-undo-btn {
+      margin-left: auto;
+      padding: 5px 10px;
+      border: 1.5px solid var(--rule);
+      border-radius: 8px;
+      background: var(--paper2);
+      color: var(--ink-soft);
+      font-family: inherit;
+      font-size: 11.5px;
+      font-weight: 700;
       cursor: pointer;
     }
     .lav-out-big {
@@ -956,6 +992,7 @@
     .out-chip.mid { background:#FBEB9C; color:#7A5E05; }
     .out-chip.minus { background:#F7DBC4; color:#9A4B00; }
     .out-chip.refused { background:#F4DAD7; color:#B02A24; }
+    .out-chip.assente { background:#E4E1D3; color:#5A5442; }
     .lav-done-date {
       margin-left: auto;
       font-size: 12px;
@@ -1010,6 +1047,7 @@
     .hist-mark.mid { background:#FBEB9C; color:#7A5E05; }
     .hist-mark.minus { background:#F7DBC4; color:#9A4B00; }
     .hist-mark.refused { background:#F4DAD7; color:#B02A24; }
+    .hist-mark.assente { background:#E4E1D3; color:#5A5442; }
     .lav-hist-count {
       margin-left: auto;
       font-size: 12px;
@@ -1410,6 +1448,7 @@
           {classData.students.map((student, idx) => (
             <div key={student.uid}>
               <div className="student-row">
+                <Avatar uid={student.uid} size={32} />
                 <div className="student-id">{idx + 1}</div>
                 <div className="student-info">
                   <select 
@@ -1675,6 +1714,12 @@
                     </div>
                   </div>
 
+                  {phase === 'revealed' && currentStudent && (
+                    <div className="slot-avatar-wrap">
+                      <AvatarFull uid={currentStudent.uid} size={92} />
+                    </div>
+                  )}
+
                   <div className="slot-actions">
                     {phase === 'rolling' && (
                       <button className="slot-btn" disabled>Estrazione…</button>
@@ -1691,7 +1736,12 @@
                     <div className="slot-done-list">
                       {queue.slice(0, current + (phase === 'revealed' ? 1 : 0)).map(uid => {
                         const num = cls.students.findIndex(s => s.uid === uid) + 1;
-                        return <span key={uid} className="slot-done-chip">{num}</span>;
+                        return (
+                          <span key={uid} className="slot-done-chip">
+                            <Avatar uid={uid} size={18} />
+                            {num}
+                          </span>
+                        );
                       })}
                     </div>
                   )}
@@ -1792,6 +1842,7 @@
                             return (
                               <div key={student.uid} className="group-member">
                                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                  <Avatar uid={student.uid} size={26} />
                                   <span className="member-id">#{num}</span>
                                 </div>
                               </div>
@@ -1832,6 +1883,251 @@
         String(dt.getMonth() + 1).padStart(2, '0') + '/' +
         dt.getFullYear();
     };
+
+    // --- AVATAR: pupazzetto robot/mostriciattolo generato dall'uid, sempre uguale ---
+    const hashStr = (str) => {
+      let h = 2166136261 >>> 0;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    };
+
+    const mulberry32 = (seed) => {
+      let s = seed;
+      return () => {
+        s |= 0; s = (s + 0x6D2B79F5) | 0;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    };
+
+    const avatarSeed = (uid) => {
+      const rng = mulberry32(hashStr(String(uid || 'x')));
+      return {
+        hue: Math.floor(rng() * 360),
+        eyeType: Math.floor(rng() * 3),
+        mouthType: Math.floor(rng() * 3),
+        antenna: rng() < 0.5,
+        sideType: Math.floor(rng() * 3), // 0 niente, 1 bulloni, 2 orecchie/corna
+        cheeks: rng() < 0.45,
+        eyeSize: 0.9 + rng() * 0.3
+      };
+    };
+
+    function Avatar({ uid, size }) {
+      const s = React.useMemo(() => avatarSeed(uid), [uid]);
+      const sz = size || 32;
+      const body = 'hsl(' + s.hue + ', 55%, 46%)';
+      const bg = 'hsl(' + s.hue + ', 60%, 92%)';
+      const accent = 'hsl(' + ((s.hue + 40) % 360) + ', 70%, 60%)';
+      const dark = 'rgba(30,30,35,0.72)';
+      return (
+        <svg width={sz} height={sz} viewBox="0 0 64 64" style={{ display: 'block', flexShrink: 0 }}>
+          <circle cx="32" cy="32" r="32" fill={bg} />
+          {s.antenna && (
+            <>
+              <line x1="32" y1="10" x2="32" y2="18" stroke={dark} strokeWidth="2" strokeLinecap="round" />
+              <circle cx="32" cy="8" r="3.2" fill={accent} />
+            </>
+          )}
+          {s.sideType === 1 && (
+            <>
+              <circle cx="14" cy="32" r="3" fill={accent} />
+              <circle cx="50" cy="32" r="3" fill={accent} />
+            </>
+          )}
+          {s.sideType === 2 && (
+            <>
+              <path d="M16 22 L10 12 L22 18 Z" fill={body} />
+              <path d="M48 22 L54 12 L42 18 Z" fill={body} />
+            </>
+          )}
+          <rect x="14" y="16" width="36" height="34" rx="12" fill={body} />
+          {s.eyeType === 0 && (
+            <>
+              <circle cx="25" cy="32" r={5 * s.eyeSize} fill="#fff" />
+              <circle cx="39" cy="32" r={5 * s.eyeSize} fill="#fff" />
+              <circle cx="25" cy="32" r={2.2 * s.eyeSize} fill={dark} />
+              <circle cx="39" cy="32" r={2.2 * s.eyeSize} fill={dark} />
+            </>
+          )}
+          {s.eyeType === 1 && (
+            <>
+              <rect x="20" y="27" width="9" height="9" rx="2" fill="#fff" />
+              <rect x="35" y="27" width="9" height="9" rx="2" fill="#fff" />
+              <rect x="23" y="30" width="3" height="3" fill={dark} />
+              <rect x="38" y="30" width="3" height="3" fill={dark} />
+            </>
+          )}
+          {s.eyeType === 2 && (
+            <>
+              <circle cx="32" cy="31" r="7.5" fill="#fff" />
+              <circle cx="32" cy="31" r="3.4" fill={dark} />
+            </>
+          )}
+          {s.mouthType === 0 && (
+            <path d="M24 40 Q32 47 40 40" stroke={dark} strokeWidth="2.4" fill="none" strokeLinecap="round" />
+          )}
+          {s.mouthType === 1 && (
+            <>
+              <rect x="26" y="41" width="3" height="6" rx="1" fill={dark} />
+              <rect x="30.5" y="41" width="3" height="6" rx="1" fill={dark} />
+              <rect x="35" y="41" width="3" height="6" rx="1" fill={dark} />
+            </>
+          )}
+          {s.mouthType === 2 && (
+            <path d="M25 41 L28 45 L31 41 L34 45 L37 41 L40 45" stroke={dark} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          )}
+          {s.cheeks && (
+            <>
+              <circle cx="19" cy="38" r="2.6" fill={accent} opacity="0.55" />
+              <circle cx="45" cy="38" r="2.6" fill={accent} opacity="0.55" />
+            </>
+          )}
+        </svg>
+      );
+    }
+
+    // Corpo intero — solo per i momenti "spotlight" (estrazione, lavagna).
+    // Sotto ai ~30px la faccia si perde: per le liste compatte resta il componente Avatar (solo testa).
+    const avatarSeedFull = (uid) => {
+      const rng = mulberry32(hashStr(String(uid || 'x')));
+      return {
+        hue: Math.floor(rng() * 360),
+        eyeType: Math.floor(rng() * 3),
+        mouthType: Math.floor(rng() * 3),
+        antenna: rng() < 0.5,
+        earType: Math.floor(rng() * 3),
+        cheeks: rng() < 0.45,
+        eyeSize: 0.9 + rng() * 0.3,
+        armPose: Math.floor(rng() * 3), // 0 giù, 1 un braccio alzato, 2 entrambe aperte
+        legType: Math.floor(rng() * 2), // 0 gambe, 1 base a ruota
+        chestPlate: rng() < 0.55
+      };
+    };
+
+    function AvatarFull({ uid, size }) {
+      const s = React.useMemo(() => avatarSeedFull(uid), [uid]);
+      const w = size || 90;
+      const h = Math.round(w * 90 / 56);
+      const body = 'hsl(' + s.hue + ', 55%, 46%)';
+      const accent = 'hsl(' + ((s.hue + 40) % 360) + ', 70%, 60%)';
+      const dark = 'rgba(30,30,35,0.72)';
+      const limb = 'hsl(' + s.hue + ', 50%, 38%)';
+      return (
+        <svg width={w} height={h} viewBox="0 0 56 90" style={{ display: 'block', flexShrink: 0 }}>
+          <ellipse cx="28" cy="86" rx="15" ry="3" fill="rgba(0,0,0,0.14)" />
+          {s.legType === 0 ? (
+            <>
+              <rect x="17" y="64" width="8" height="18" rx="3.5" fill={limb} />
+              <rect x="31" y="64" width="8" height="18" rx="3.5" fill={limb} />
+              <ellipse cx="21" cy="83" rx="5.5" ry="3.4" fill={accent} />
+              <ellipse cx="35" cy="83" rx="5.5" ry="3.4" fill={accent} />
+            </>
+          ) : (
+            <>
+              <ellipse cx="28" cy="76" rx="13" ry="9" fill={limb} />
+              <ellipse cx="28" cy="82" rx="15" ry="4.5" fill={accent} />
+            </>
+          )}
+          {s.armPose === 0 && (
+            <>
+              <rect x="6" y="42" width="7" height="20" rx="3.5" fill={limb} />
+              <rect x="43" y="42" width="7" height="20" rx="3.5" fill={limb} />
+              <circle cx="9.5" cy="64" r="4.2" fill={accent} />
+              <circle cx="46.5" cy="64" r="4.2" fill={accent} />
+            </>
+          )}
+          {s.armPose === 1 && (
+            <>
+              <rect x="6" y="42" width="7" height="20" rx="3.5" fill={limb} />
+              <circle cx="9.5" cy="64" r="4.2" fill={accent} />
+              <g transform="rotate(-135 43 44)">
+                <rect x="43" y="44" width="7" height="20" rx="3.5" fill={limb} />
+                <circle cx="46.5" cy="66" r="4.2" fill={accent} />
+              </g>
+            </>
+          )}
+          {s.armPose === 2 && (
+            <>
+              <g transform="rotate(35 9.5 44)">
+                <rect x="6" y="44" width="7" height="20" rx="3.5" fill={limb} />
+                <circle cx="9.5" cy="66" r="4.2" fill={accent} />
+              </g>
+              <g transform="rotate(-35 46.5 44)">
+                <rect x="43" y="44" width="7" height="20" rx="3.5" fill={limb} />
+                <circle cx="46.5" cy="66" r="4.2" fill={accent} />
+              </g>
+            </>
+          )}
+          <rect x="12" y="40" width="32" height="30" rx="10" fill={body} />
+          {s.chestPlate && <rect x="23" y="48" width="10" height="8" rx="3" fill={accent} opacity="0.9" />}
+          {s.antenna && (
+            <>
+              <line x1="28" y1="12" x2="28" y2="5" stroke={dark} strokeWidth="2" strokeLinecap="round" />
+              <circle cx="28" cy="3" r="2.4" fill={accent} />
+            </>
+          )}
+          {s.earType === 1 && (
+            <>
+              <circle cx="10" cy="27" r="3" fill={accent} />
+              <circle cx="46" cy="27" r="3" fill={accent} />
+            </>
+          )}
+          {s.earType === 2 && (
+            <>
+              <path d="M12 17 L6 7 L18 13 Z" fill={body} />
+              <path d="M44 17 L50 7 L38 13 Z" fill={body} />
+            </>
+          )}
+          <rect x="10" y="12" width="36" height="32" rx="13" fill={body} />
+          {s.eyeType === 0 && (
+            <>
+              <circle cx="21" cy="27" r={5 * s.eyeSize} fill="#fff" />
+              <circle cx="35" cy="27" r={5 * s.eyeSize} fill="#fff" />
+              <circle cx="21" cy="27" r={2.2 * s.eyeSize} fill={dark} />
+              <circle cx="35" cy="27" r={2.2 * s.eyeSize} fill={dark} />
+            </>
+          )}
+          {s.eyeType === 1 && (
+            <>
+              <rect x="16" y="22" width="9" height="9" rx="2" fill="#fff" />
+              <rect x="31" y="22" width="9" height="9" rx="2" fill="#fff" />
+              <rect x="19" y="25" width="3" height="3" fill={dark} />
+              <rect x="34" y="25" width="3" height="3" fill={dark} />
+            </>
+          )}
+          {s.eyeType === 2 && (
+            <>
+              <circle cx="28" cy="26" r="7.5" fill="#fff" />
+              <circle cx="28" cy="26" r="3.4" fill={dark} />
+            </>
+          )}
+          {s.mouthType === 0 && (
+            <path d="M20 35 Q28 42 36 35" stroke={dark} strokeWidth="2.4" fill="none" strokeLinecap="round" />
+          )}
+          {s.mouthType === 1 && (
+            <>
+              <rect x="22" y="36" width="3" height="6" rx="1" fill={dark} />
+              <rect x="26.5" y="36" width="3" height="6" rx="1" fill={dark} />
+              <rect x="31" y="36" width="3" height="6" rx="1" fill={dark} />
+            </>
+          )}
+          {s.mouthType === 2 && (
+            <path d="M21 36 L24 40 L27 36 L30 40 L33 36 L36 40" stroke={dark} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          )}
+          {s.cheeks && (
+            <>
+              <circle cx="15" cy="33" r="2.6" fill={accent} opacity="0.55" />
+              <circle cx="41" cy="33" r="2.6" fill={accent} opacity="0.55" />
+            </>
+          )}
+        </svg>
+      );
+    }
 
     // --- EXPORT PDF ---
     const getJsPDF = () => (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : null;
@@ -2011,6 +2307,7 @@
                   {cls.students.map((student, idx) => (
                     <div key={student.uid} className="reg-student">
                       <div className="reg-head">
+                        <Avatar uid={student.uid} size={28} />
                         <span className="reg-id">{idx + 1}</span>
                       </div>
 
@@ -2178,8 +2475,8 @@
     }
 
     // ALLA LAVAGNA TAB
-    const OUTCOME_LABEL = { plus: 'Bene', mid: 'Così così', minus: 'Male', refused: 'Rifiuto' };
-    const OUTCOME_GLYPH = { plus: '+', mid: '~', minus: '–', refused: '✕' };
+    const OUTCOME_LABEL = { plus: 'Bene', mid: 'Così così', minus: 'Male', refused: 'Rifiuto', assente: 'Assente' };
+    const OUTCOME_GLYPH = { plus: '+', mid: '~', minus: '–', refused: '✕', assente: 'A' };
 
     function LavagnaTab({ data, saveData }) {
       const [selectedClass, setSelectedClass] = useState(null);
@@ -2204,7 +2501,19 @@
       const clav = getClassLav();
       const total = cls ? cls.students.length : 0;
       const done = clav.doneThisRound || [];
-      const pending = cls ? cls.students.filter(s => !done.includes(s.uid)) : [];
+
+      // vero se l'ultima annotazione di oggi per questo studente è "assente"
+      const isAbsentToday = (uid) => {
+        const turns = (clav.turns && clav.turns[uid]) || [];
+        const today = todayISO();
+        for (let i = turns.length - 1; i >= 0; i--) {
+          if (turns[i].date === today) return turns[i].outcome === 'assente';
+        }
+        return false;
+      };
+
+      const pending = cls ? cls.students.filter(s => !done.includes(s.uid) && !isAbsentToday(s.uid)) : [];
+      const absentToday = cls ? cls.students.filter(s => !done.includes(s.uid) && isAbsentToday(s.uid)) : [];
       const roundComplete = cls && total > 0 && done.length >= total;
 
       const ensureLav = (nd) => {
@@ -2231,6 +2540,37 @@
         saveData(newData);
         setCurrentId(null);
         setShowOutcomes(false);
+      };
+
+      // segna assente: registra la data ma NON conta come turno del giro,
+      // così lo studente dovrà comunque passare quando sarà presente
+      const markAbsent = () => {
+        if (!currentId) return;
+        const newData = { ...data };
+        const cl = ensureLav(newData);
+        if (!cl.turns[currentId]) cl.turns[currentId] = [];
+        cl.turns[currentId].push({
+          date: todayISO(),
+          outcome: 'assente',
+          round: cl.round
+        });
+        saveData(newData);
+        setCurrentId(null);
+        setShowOutcomes(false);
+      };
+
+      // annulla l'assenza segnata oggi per errore
+      const undoAbsence = (uid) => {
+        const newData = { ...data };
+        const cl = ensureLav(newData);
+        const turns = cl.turns[uid] || [];
+        for (let i = turns.length - 1; i >= 0; i--) {
+          if (turns[i].date === todayISO() && turns[i].outcome === 'assente') {
+            turns.splice(i, 1);
+            break;
+          }
+        }
+        saveData(newData);
       };
 
       const pickRandom = () => {
@@ -2276,7 +2616,7 @@
       return (
         <>
           <h2 className="sec">Alla lavagna</h2>
-          <p className="hint">Ogni studente fa il suo turno prima che qualcuno ci torni. Segna l'esito o il rifiuto: la data viene registrata.</p>
+          <p className="hint">Ogni studente fa il suo turno prima che qualcuno ci torni. Segna l'esito, il rifiuto o l'assenza: la data viene registrata. Chi è segnato assente non viene riproposto oggi, ma dovrà comunque fare il suo turno.</p>
 
           {classi.length === 0 ? (
             <div className="empty">
@@ -2311,6 +2651,24 @@
                     <div className="lav-progress-fill" style={{ width: (total ? (done.length / total * 100) : 0) + '%' }}></div>
                   </div>
 
+                  {/* Assenti oggi: esclusi dal sorteggio/scelta odierna, il turno resta da fare */}
+                  {absentToday.length > 0 && (
+                    <>
+                      <div className="lav-section-label">Assenti oggi ({absentToday.length}) — non verranno riproposti oggi</div>
+                      {absentToday.map(s => {
+                        const num = cls.students.findIndex(x => x.uid === s.uid) + 1;
+                        return (
+                          <div key={s.uid} className="lav-done-row">
+                            <Avatar uid={s.uid} size={24} />
+                            <span className="lav-done-id">{num}</span>
+                            <span className="out-chip assente">A Assente</span>
+                            <button className="lav-undo-btn" onClick={() => undoAbsence(s.uid)}>Annulla</button>
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
+
                   {/* Giro completato */}
                   {roundComplete && (
                     <div className="lav-complete">
@@ -2326,17 +2684,21 @@
                   {!roundComplete && currentStudent && (
                     <div className="lav-current">
                       <div className="lav-current-label">Alla lavagna</div>
+                      <div className="lav-avatar-wrap">
+                        <AvatarFull uid={currentStudent.uid} size={116} />
+                      </div>
                       <div className="lav-current-id">{currentNum}</div>
 
                       {!showOutcomes && (
                         <>
-                          <button
-                            className="btn"
-                            onClick={() => setShowOutcomes(true)}
-                            style={{ width: '100%', marginTop: '16px' }}
-                          >
-                            Esito
-                          </button>
+                          <div className="lav-precheck">
+                            <button className="btn" onClick={() => setShowOutcomes(true)}>
+                              Esito
+                            </button>
+                            <button className="btn lav-absent-btn" onClick={markAbsent}>
+                              Assente
+                            </button>
+                          </div>
                           <button
                             className="lav-cancel"
                             onClick={() => setCurrentId(null)}
@@ -2386,6 +2748,7 @@
                               className="lav-pending-pill"
                               onClick={() => selectStudent(s.uid)}
                             >
+                              <Avatar uid={s.uid} size={20} />
                               {num}
                             </div>
                           );
@@ -2405,6 +2768,7 @@
                         const num = cls.students.findIndex(s => s.uid === uid) + 1;
                         return (
                           <div key={uid} className="lav-done-row">
+                            <Avatar uid={uid} size={24} />
                             <span className="lav-done-id">{num}</span>
                             <span className={'out-chip ' + turn.outcome}>
                               {OUTCOME_GLYPH[turn.outcome]} {OUTCOME_LABEL[turn.outcome]}
@@ -2431,6 +2795,7 @@
                         const turns = (clav.turns && clav.turns[s.uid]) || [];
                         return (
                           <div key={s.uid} className="lav-hist-row">
+                            <Avatar uid={s.uid} size={22} />
                             <span className="lav-hist-id">{idx + 1}</span>
                             <div className="lav-hist-marks">
                               {turns.length === 0
