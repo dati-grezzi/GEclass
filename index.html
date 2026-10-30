@@ -1067,7 +1067,7 @@
   <script type="text/babel">
     const { useState, useEffect, useCallback, useRef } = React;
 
-    const APP_VERSION = '1.1.0';
+    const APP_VERSION = '1.2.0';
     const STORAGE_KEY = 'gestionale-classe-data';
 
     // Piano annuale seconde (matematica e scienze)
@@ -1237,6 +1237,12 @@
                 Alla lavagna
               </button>
               <button 
+                className={tab === 'oggi' ? 'on' : ''}
+                onClick={() => setTab('oggi')}
+              >
+                Che si fa oggi?
+              </button>
+              <button 
                 className={tab === 'programmazione' ? 'on' : ''}
                 onClick={() => setTab('programmazione')}
               >
@@ -1255,6 +1261,7 @@
             {tab === 'gruppi' && <GruppiTab data={data} saveData={saveData} />}
             {tab === 'registro' && <RegistroTab data={data} saveData={saveData} />}
             {tab === 'lavagna' && <LavagnaTab data={data} saveData={saveData} />}
+            {tab === 'oggi' && <OggiTab data={data} saveData={saveData} />}
             {tab === 'programmazione' && <ProgrammazioneTab data={data} saveData={saveData} />}
             {tab === 'backup' && <BackupTab data={data} saveData={saveData} />}
           </main>
@@ -2395,28 +2402,28 @@
     }
 
     // BACKUP TAB
-    // ---------- Programmazione (piano annuale seconde) ----------
-    const ORARIO_SECONDA = {
+    // ---------- Programmazione e "Che si fa oggi?" per classe ----------
+    const GIORNI_IT = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+    const MATERIE_PROG = { aritmetica: 'Aritmetica', geometria: 'Geometria', scienze: 'Scienze' };
+    const ORARIO_SECONDA_DEFAULT = {
       1: { materia: 'scienze', ore: 1 },
       2: { materia: 'geometria', ore: 1 },
       3: { materia: 'scienze', ore: 1 },
       4: { materia: 'aritmetica', ore: 2 },
       5: { materia: 'geometria', ore: 1 }
     };
-    const GIORNI_IT = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
-    const MATERIE_PROG = { aritmetica: 'Aritmetica', geometria: 'Geometria', scienze: 'Scienze' };
 
-    // Sequenze lezione per lezione, costruite dal piano annuale
-    const buildSeqProg = () => {
+    // Sequenze lezione per materia, costruite da un piano annuale
+    const buildSeqPiano = (piano) => {
       const seq = { aritmetica: [], geometria: [], scienze: [] };
-      PIANO_SECONDE.matematica.settimane.forEach(w => {
+      ((piano.matematica && piano.matematica.settimane) || []).forEach(w => {
         ['aritmetica', 'geometria'].forEach(m => {
           const c = w[m];
           if (!c || !c.testo || c.tipo === 'vacanza' || c.tipo === 'stop') return;
           seq[m].push({ id: m[0] + '-' + w.settimana, settimana: w.settimana, mese: w.mese, testo: c.testo, tipo: c.tipo || 'lezione' });
         });
       });
-      PIANO_SECONDE.scienze.unita.forEach(u => {
+      ((piano.scienze && piano.scienze.unita) || []).forEach(u => {
         if (u.tipo === 'verifica') {
           seq.scienze.push({ id: u.id, unita: u.titolo, testo: u.titolo, mese: u.mese, tipo: 'verifica' });
           return;
@@ -2428,21 +2435,78 @@
       });
       return seq;
     };
-    const SEQ_PROG = buildSeqProg();
 
-    // Punto di partenza: settimana attuale del piano (7 = verifica 26/10-3/11)
-    const cursoreIniziale = (m) => {
-      const s = SEQ_PROG[m];
-      if (m === 'scienze') return Math.max(0, s.findIndex(x => x.mese === 'Ottobre'));
-      const i = s.findIndex(x => parseInt(x.settimana, 10) >= 7);
+    // Piani disponibili. Per aggiungerne uno: una nuova voce qui.
+    const PIANI = {
+      seconde: { etichetta: 'Seconde', seq: buildSeqPiano(PIANO_SECONDE) }
+    };
+
+    // Punto di partenza: settimana 7 del piano per le materie a settimane, ottobre per scienze
+    const cursoreIniziale = (seq, m) => {
+      const lista = seq[m] || [];
+      let i = lista.findIndex(x => x.settimana != null && parseInt(x.settimana, 10) >= 7);
+      if (i < 0) i = lista.findIndex(x => x.mese === 'Ottobre');
       return i < 0 ? 0 : i;
     };
 
-    function CursorePiano({ materia, cur, setCur }) {
-      const seq = SEQ_PROG[materia];
-      const item = seq[cur];
+    // Configurazione di una classe: salvata, oppure predefinita (le classi "2..." sono seconde)
+    const configBase = (classe, data) => {
+      const prog = data.programmazione || {};
+      const salvata = (prog.classi || {})[classe.id];
+      if (salvata) return salvata;
+      const seconda = /^\s*2/.test(classe.nome || '');
+      return {
+        piano: seconda ? 'seconde' : null,
+        orario: seconda ? ORARIO_SECONDA_DEFAULT : {},
+        cursori: prog.cursori || {}
+      };
+    };
+
+    const statoClasse = (classe, data) => {
+      const base = configBase(classe, data);
+      const seq = base.piano && PIANI[base.piano] ? PIANI[base.piano].seq : null;
+      const cursori = { ...(base.cursori || {}) };
+      if (seq) Object.keys(seq).forEach(m => { if (cursori[m] == null) cursori[m] = cursoreIniziale(seq, m); });
+      return { piano: base.piano || null, seq, orario: base.orario || {}, cursori };
+    };
+
+    const salvaClasse = (data, saveData, classe, patch) => {
+      const base = configBase(classe, data);
+      const prog = data.programmazione || {};
+      saveData({
+        ...data,
+        programmazione: { ...prog, classi: { ...(prog.classi || {}), [classe.id]: { ...base, ...patch } } }
+      });
+    };
+
+    const creaSetCur = (data, saveData, classe, stato) => (m, idx) => {
+      const max = (stato.seq && stato.seq[m] ? stato.seq[m].length : 0);
+      const v = Math.max(0, Math.min(max, idx));
+      salvaClasse(data, saveData, classe, { cursori: { ...stato.cursori, [m]: v } });
+    };
+
+    // Prossime sessioni: ogni sessione prende la lezione successiva della sua materia
+    const prossimeSessioni = (stato, giorni) => {
+      const oggi = new Date();
+      const cont = { ...stato.cursori };
+      const out = [];
+      for (let k = 0; k < giorni; k++) {
+        const d = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate() + k);
+        const slot = stato.orario[d.getDay()];
+        if (!slot || !slot.materia) continue;
+        const idx = cont[slot.materia] || 0;
+        cont[slot.materia] = idx + 1;
+        const item = stato.seq && stato.seq[slot.materia] ? stato.seq[slot.materia][idx] : null;
+        out.push({ k, data: d, materia: slot.materia, ore: slot.ore, item });
+      }
+      return out;
+    };
+
+    function CursoreMateria({ seq, materia, cur, onSet }) {
+      const lista = seq[materia] || [];
+      const item = lista[cur];
       return (
-        <div className="card">
+        <div className="card" style={{ marginBottom: 8 }}>
           <div className="card-header"><strong>{MATERIE_PROG[materia]}</strong></div>
           {item ? (
             <>
@@ -2457,11 +2521,11 @@
             <div className="hint">Piano completato.</div>
           )}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
-            <button className="btn ghost" disabled={cur <= 0} onClick={() => setCur(materia, cur - 1)}>← Indietro</button>
-            <button className="btn" onClick={() => setCur(materia, cur + 1)}>Fatto, avanti →</button>
+            <button className="btn ghost" disabled={cur <= 0} onClick={() => onSet(cur - 1)}>← Indietro</button>
+            <button className="btn" onClick={() => onSet(cur + 1)}>Fatto, avanti →</button>
           </div>
-          <select value={cur} onChange={e => setCur(materia, parseInt(e.target.value, 10))} style={{ marginTop: 8, width: '100%' }}>
-            {seq.map((x, i) => (
+          <select value={cur} onChange={e => onSet(parseInt(e.target.value, 10))} style={{ marginTop: 8, width: '100%' }}>
+            {lista.map((x, i) => (
               <option key={x.id + '-' + i} value={i}>
                 {(x.settimana != null ? 'S' + x.settimana + ' · ' : '') + x.testo.slice(0, 60)}
               </option>
@@ -2471,58 +2535,126 @@
       );
     }
 
-    function ProgrammazioneTab({ data, saveData }) {
+    function OggiTab({ data, saveData }) {
+      const classi = Object.values(data.classi || {});
+      const [classId, setClassId] = useState(classi[0] ? classi[0].id : null);
+      const [materiaScelta, setMateriaScelta] = useState(null);
+      const classe = classi.find(c => c.id === classId) || classi[0];
+      if (!classe) return <p className="empty">Crea prima una classe nella scheda Classi.</p>;
+
+      const stato = statoClasse(classe, data);
       const oggi = new Date();
-      const prog = data.programmazione || {};
-      const salvati = prog.cursori || {};
-      const cur = (m) => (salvati[m] != null ? salvati[m] : cursoreIniziale(m));
-      const setCur = (m, idx) => {
-        const v = Math.max(0, Math.min(SEQ_PROG[m].length, idx));
-        const nuovi = {
-          aritmetica: cur('aritmetica'),
-          geometria: cur('geometria'),
-          scienze: cur('scienze'),
-          [m]: v
-        };
-        saveData({ ...data, programmazione: { ...prog, cursori: nuovi } });
-      };
-
-      // Prossime 14 giorni: ogni sessione prende la lezione successiva della sua materia
-      const contatore = { aritmetica: cur('aritmetica'), geometria: cur('geometria'), scienze: cur('scienze') };
-      const prossime = [];
-      for (let k = 0; k < 14; k++) {
-        const d = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate() + k);
-        const slot = ORARIO_SECONDA[d.getDay()];
-        if (!slot) continue;
-        const idx = contatore[slot.materia]++;
-        prossime.push({ k, data: d, materia: slot.materia, ore: slot.ore, item: SEQ_PROG[slot.materia][idx] });
-      }
-
-      const slotOggi = ORARIO_SECONDA[oggi.getDay()];
-      const prossimaSessione = prossime.find(p => p.k > 0);
+      const slot = stato.orario[oggi.getDay()];
+      const materieDisponibili = stato.seq ? Object.keys(stato.seq) : [];
+      const materia = materiaScelta || (slot && slot.materia) || materieDisponibili[0] || null;
+      const setCur = creaSetCur(data, saveData, classe, stato);
 
       return (
-        <div className="sec-wrap">
-          <div className="sec">Oggi · {GIORNI_IT[oggi.getDay()]} {oggi.toLocaleDateString('it-IT')}</div>
-          {slotOggi ? (
-            <p className="hint">
-              Seconda: {MATERIE_PROG[slotOggi.materia]}, {slotOggi.ore} {slotOggi.ore > 1 ? 'ore' : 'ora'}.
-            </p>
-          ) : (
-            <p className="hint">
-              Oggi non c'è lezione di seconda.
-              {prossimaSessione && ' Prossima: ' + GIORNI_IT[prossimaSessione.data.getDay()] + ' (' + MATERIE_PROG[prossimaSessione.materia] + ').'}
-            </p>
+        <div>
+          <select value={classe.id} onChange={e => { setClassId(e.target.value); setMateriaScelta(null); }} style={{ width: '100%' }}>
+            {classi.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+          </select>
+
+          <div className="sec" style={{ marginTop: 12 }}>Oggi · {GIORNI_IT[oggi.getDay()]} {oggi.toLocaleDateString('it-IT')}</div>
+          {!stato.piano && <p className="hint">Questa classe non ha un piano: assegnalo nella scheda Programmazione.</p>}
+          {stato.piano && (
+            <>
+              <p className="hint">
+                {slot
+                  ? 'Previsto oggi: ' + MATERIE_PROG[slot.materia] + ', ' + slot.ore + (slot.ore > 1 ? ' ore' : ' ora') + '.'
+                  : "Oggi non c'è una lezione prevista per questa classe."}
+              </p>
+              <select value={materia || ''} onChange={e => setMateriaScelta(e.target.value)} style={{ width: '100%', marginBottom: 8 }}>
+                {materieDisponibili.map(m => <option key={m} value={m}>{MATERIE_PROG[m]}</option>)}
+              </select>
+              {materiaScelta && slot && materiaScelta !== slot.materia && (
+                <button className="btn ghost" style={{ marginBottom: 8 }} onClick={() => setMateriaScelta(null)}>
+                  Torna alla materia del giorno
+                </button>
+              )}
+              {materia && (
+                <CursoreMateria seq={stato.seq} materia={materia} cur={stato.cursori[materia] || 0} onSet={(idx) => setCur(materia, idx)} />
+              )}
+            </>
+          )}
+        </div>
+      );
+    }
+
+    function ProgrammazioneTab({ data, saveData }) {
+      const classi = Object.values(data.classi || {});
+      const [classId, setClassId] = useState(classi[0] ? classi[0].id : null);
+      const classe = classi.find(c => c.id === classId) || classi[0];
+      if (!classe) return <p className="empty">Crea prima una classe nella scheda Classi.</p>;
+
+      const stato = statoClasse(classe, data);
+      const setCur = creaSetCur(data, saveData, classe, stato);
+      const sessioni = prossimeSessioni(stato, 14);
+      const oggi = new Date();
+
+      return (
+        <div>
+          <select value={classe.id} onChange={e => setClassId(e.target.value)} style={{ width: '100%' }}>
+            {classi.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+          </select>
+
+          <div className="sec" style={{ marginTop: 12 }}>Piano</div>
+          <select
+            value={stato.piano || ''}
+            onChange={e => salvaClasse(data, saveData, classe, { piano: e.target.value || null, cursori: {} })}
+            style={{ width: '100%' }}
+          >
+            <option value="">— nessun piano —</option>
+            {Object.keys(PIANI).map(k => <option key={k} value={k}>{PIANI[k].etichetta}</option>)}
+          </select>
+
+          <div className="sec" style={{ marginTop: 12 }}>Orario settimanale</div>
+          {[1, 2, 3, 4, 5].map(g => {
+            const riga = stato.orario[g] || {};
+            return (
+              <div key={g} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+                <span style={{ width: 90 }}>{GIORNI_IT[g]}</span>
+                <select
+                  value={riga.materia || ''}
+                  style={{ flex: 1 }}
+                  onChange={e => {
+                    const o = { ...stato.orario };
+                    if (!e.target.value) delete o[g];
+                    else o[g] = { materia: e.target.value, ore: riga.ore || 1 };
+                    salvaClasse(data, saveData, classe, { orario: o });
+                  }}
+                >
+                  <option value="">—</option>
+                  {Object.keys(MATERIE_PROG).map(m => <option key={m} value={m}>{MATERIE_PROG[m]}</option>)}
+                </select>
+                <input
+                  type="number"
+                  min="0.5"
+                  step="0.5"
+                  disabled={!riga.materia}
+                  value={riga.ore || ''}
+                  style={{ width: 70 }}
+                  onChange={e => {
+                    const o = { ...stato.orario, [g]: { ...riga, ore: parseFloat(e.target.value) || 1 } };
+                    salvaClasse(data, saveData, classe, { orario: o });
+                  }}
+                />
+              </div>
+            );
+          })}
+
+          {stato.seq && (
+            <>
+              <div className="sec" style={{ marginTop: 12 }}>Cursori</div>
+              {Object.keys(stato.seq).map(m => (
+                <CursoreMateria key={m} seq={stato.seq} materia={m} cur={stato.cursori[m] || 0} onSet={(idx) => setCur(m, idx)} />
+              ))}
+            </>
           )}
 
-          <div className="sec">Cursori</div>
-          {['aritmetica', 'geometria', 'scienze'].map(m => (
-            <CursorePiano key={m} materia={m} cur={cur(m)} setCur={setCur} />
-          ))}
-
-          <div className="sec">Prossime sessioni</div>
-          {prossime.length === 0 && <p className="empty">Nessuna sessione nei prossimi 14 giorni.</p>}
-          {prossime.map((p, i) => (
+          <div className="sec" style={{ marginTop: 12 }}>Prossime sessioni</div>
+          {sessioni.length === 0 && <p className="empty">Nessuna sessione nei prossimi 14 giorni.</p>}
+          {sessioni.map((p, i) => (
             <div key={i} className="card" style={{ marginBottom: 8 }}>
               <div className="hint">
                 {p.k === 0 ? 'Oggi · ' : ''}{GIORNI_IT[p.data.getDay()]} {p.data.toLocaleDateString('it-IT')} · {MATERIE_PROG[p.materia]} {p.ore}h
