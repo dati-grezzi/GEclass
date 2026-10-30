@@ -1067,7 +1067,7 @@
   <script type="text/babel">
     const { useState, useEffect, useCallback, useRef } = React;
 
-    const APP_VERSION = '1.3.0';
+    const APP_VERSION = '1.4.0';
     const STORAGE_KEY = 'gestionale-classe-data';
 
     // Piano annuale seconde (matematica e scienze)
@@ -2514,9 +2514,10 @@
       return out;
     };
 
-    function CursoreMateria({ seq, materia, cur, onSet }) {
+    function CursoreMateria({ seq, materia, cur, onSet, storico = false }) {
       const lista = seq[materia] || [];
       const item = lista[cur];
+      const [mostraPrecedenti, setMostraPrecedenti] = useState(false);
       return (
         <div className="card" style={{ marginBottom: 8 }}>
           <div className="card-header"><strong>{MATERIE_PROG[materia]}</strong></div>
@@ -2543,6 +2544,26 @@
               </option>
             ))}
           </select>
+          {storico && cur > 0 && (
+            <div style={{ marginTop: 8 }}>
+              <button className="btn ghost" onClick={() => setMostraPrecedenti(!mostraPrecedenti)}>
+                {mostraPrecedenti ? 'Nascondi argomenti precedenti' : 'Argomenti precedenti (' + cur + ')'}
+              </button>
+              {mostraPrecedenti && (
+                <div style={{ marginTop: 6, maxHeight: 260, overflowY: 'auto' }}>
+                  {Array.from({ length: cur }, (_, k) => cur - 1 - k).map(i => (
+                    <div key={lista[i].id + '-' + i} style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '4px 0', borderBottom: '1px solid #ddd' }}>
+                      <span className="hint" style={{ minWidth: 60 }}>
+                        {lista[i].settimana != null ? 'S' + lista[i].settimana : lista[i].mese}
+                      </span>
+                      <span style={{ flex: 1 }}>{lista[i].testo}</span>
+                      <button className="btn-mini" onClick={() => onSet(i)}>Torna qui</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       );
     }
@@ -2659,7 +2680,7 @@
             <>
               <div className="sec" style={{ marginTop: 12 }}>Cursori</div>
               {Object.keys(stato.seq).map(m => (
-                <CursoreMateria key={m} seq={stato.seq} materia={m} cur={stato.cursori[m] || 0} onSet={(idx) => setCur(m, idx)} />
+                <CursoreMateria key={m} seq={stato.seq} materia={m} cur={stato.cursori[m] || 0} onSet={(idx) => setCur(m, idx)} storico />
               ))}
             </>
           )}
