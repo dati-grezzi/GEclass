@@ -1069,11 +1069,15 @@
 
     const STORAGE_KEY = 'gestionale-classe-data';
 
+    // Piano annuale seconde (matematica e scienze)
+    const PIANO_SECONDE = {"anno": "2026-27", "classe": "seconde", "fonti": ["PIANO_ANNUALE_MATEMATICA_seconde_26-27.docx", "PIANO_ANNUALE_SCIENZE_seconde_25-26.docx (intestazione interna: 2026-27)"], "note_fonte": ["Matematica: struttura per settimana (1-38), ore per aritmetica e geometria.", "Scienze: struttura per unità/nuclei con pagine del libro, senza settimane né ore: va collocata sull'orario.", "Settimana 17 compare due volte nel piano di matematica: la seconda occorrenza è indicata come 17b.", "Nel piano di scienze alcune voci sono barrate: indicate con 'barrato': true."], "matematica": {"settimane": [{"settimana": 1, "mese": "Settembre", "aritmetica": {"testo": "RIPASSO", "ore": null}, "geometria": {"testo": "RIPASSO", "ore": null}}, {"settimana": 2, "mese": "Settembre", "aritmetica": {"testo": "RIPASSO", "ore": null}, "geometria": {"testo": "RIPASSO", "ore": null}}, {"settimana": 3, "mese": "Ottobre", "aritmetica": {"testo": null, "ore": 2}, "geometria": {"testo": "Unità di misura dell'area", "ore": 2}}, {"settimana": 4, "mese": "Ottobre", "aritmetica": {"testo": "La radice quadrata", "ore": 2}, "geometria": {"testo": "Area rettangolo", "ore": 2}}, {"settimana": 5, "mese": "Ottobre", "aritmetica": {"testo": "Espressioni con radici e proprietà", "ore": 2}, "geometria": {"testo": "Area quadrato", "ore": 2}}, {"settimana": 6, "mese": "Ottobre", "aritmetica": {"testo": "Approssimazione radici", "ore": 2}, "geometria": {"testo": "Problemi area rettangolo e quadrato", "ore": null}}, {"settimana": 7, "mese": "Ottobre", "aritmetica": {"testo": "VERIFICA dal 26/10 al 3/11 (arit. cap. 2, geom. cap. 1) + correzione", "ore": null, "tipo": "verifica"}, "geometria": {"testo": "VERIFICA dal 26/10 al 3/11 (arit. cap. 2, geom. cap. 1) + correzione", "ore": null, "tipo": "verifica"}}, {"settimana": 8, "mese": "Novembre", "aritmetica": {"testo": "Caldo/freddo, termometro, opposto; il meno come segno e come operatore", "ore": 2}, "geometria": {"testo": "Area rombo", "ore": 2}}, {"settimana": 9, "mese": "Novembre", "aritmetica": {"testo": "Addizioni e sottrazioni", "ore": 3}, "geometria": {"testo": "Esercitazione", "ore": 1}}, {"settimana": 10, "mese": "Novembre", "aritmetica": {"testo": "Moltiplicazioni e divisioni", "ore": 3}, "geometria": {"testo": "Area trapezio (cenni triangolo)", "ore": 1}}, {"settimana": 11, "mese": "Novembre", "aritmetica": {"testo": "Potenze ed espressioni", "ore": 2}, "geometria": {"testo": "Esercitazione", "ore": 2}}, {"settimana": 12, "mese": "Dicembre", "aritmetica": {"testo": "VERIFICA numeri relativi e aree", "ore": 2, "tipo": "verifica"}, "geometria": {"testo": "VERIFICA dal 30/11 al 05/12 e problem solving (OPS)", "ore": 2, "tipo": "verifica"}}, {"settimana": 13, "mese": "Dicembre", "aritmetica": {"testo": "Immacolata e ponte; Rapporti cap. 17-18", "ore": 1}, "geometria": {"testo": "Area triangolo, criteri di congruenza e punti notevoli", "ore": 1}}, {"settimana": 14, "mese": "Dicembre", "aritmetica": {"testo": "Rapporti cap. 17-18; proporzioni cap. 22 + A332; un po' di scienze: miscugli", "ore": "2/3"}, "geometria": {"testo": "Area triangolo, criteri di congruenza e punti notevoli", "ore": 2}}, {"settimana": 15, "mese": "Dicembre", "aritmetica": {"testo": "Vacanze di Natale", "ore": null, "tipo": "vacanza"}, "geometria": {"testo": "Vacanze di Natale", "ore": null, "tipo": "vacanza"}}, {"settimana": 16, "mese": "Gennaio", "aritmetica": {"testo": null, "ore": null}, "geometria": {"testo": null, "ore": null}}, {"settimana": 17, "mese": "Gennaio", "aritmetica": {"testo": null, "ore": null}, "geometria": {"testo": null, "ore": null}}, {"settimana": "17b", "mese": "Gennaio", "aritmetica": {"testo": "Le proporzioni cap. 22-23", "ore": "1/2"}, "geometria": {"testo": "Area triangolo, criteri di congruenza e punti notevoli", "ore": 1}}, {"settimana": 18, "mese": "Gennaio", "aritmetica": {"testo": "Rapporti e proporzioni cap. 24", "ore": 2}, "geometria": {"testo": "Applicazioni delle proporzioni: rapporto di scala e carte geografiche (lezz. 15-18)", "ore": 2}}, {"settimana": 19, "mese": "Gennaio", "aritmetica": {"testo": "VERIFICA cap. 3 aritmetica dal 18 al 23/01", "ore": 2, "tipo": "verifica"}, "geometria": {"testo": "VERIFICA cap. 4 geometria dal 19/01 + correzione", "ore": 2, "tipo": "verifica"}}, {"settimana": 20, "mese": "Gennaio", "aritmetica": {"testo": "Esercitazioni, correzione, ripasso; A330 La mate e l'alcool", "ore": 4}, "geometria": {"testo": "Esercitazioni, correzione, ripasso; teorema di Euclide e similitudine", "ore": 0}}, {"settimana": 21, "mese": "Febbraio", "aritmetica": {"testo": "Settimana di stop", "ore": 2, "tipo": "stop"}, "geometria": {"testo": "Settimana di stop", "ore": 2, "tipo": "stop"}}, {"settimana": 22, "mese": "Febbraio", "aritmetica": {"testo": "Problemi con le percentuali (sconto, aumento)", "ore": 2}, "geometria": {"testo": "Pitagora", "ore": 2}}, {"settimana": 23, "mese": "Febbraio", "aritmetica": {"testo": "Problemi con le percentuali + cap. 2 ed. finanziaria", "ore": 2}, "geometria": {"testo": "TP e applicazioni PT", "ore": 2}}, {"settimana": 24, "mese": "Febbraio", "aritmetica": {"testo": "Cap. 2 ed. finanziaria", "ore": 1}, "geometria": {"testo": "PT e triangoli particolari (rad2 e rad3)", "ore": 3}}, {"settimana": 25, "mese": "Marzo", "aritmetica": {"testo": "VERIFICA 4 dal 04 al 09/03", "ore": 2, "tipo": "verifica"}, "geometria": {"testo": "VERIFICA 4 dal 04 al 09/03", "ore": 2, "tipo": "verifica"}}, {"settimana": 26, "mese": "Marzo", "aritmetica": {"testo": "Pi greco day, giornata internazionale della matematica", "ore": 2}, "geometria": {"testo": "Pi greco day; labirinto delle aree (G178); puzzle per il teorema di Pitagora (G179)", "ore": 2}}, {"settimana": 27, "mese": "Marzo", "aritmetica": {"testo": "Lez. 19 Grafici + A338 (ebook)", "ore": 3}, "geometria": {"testo": "Riconoscere ingrandimenti e riduzioni (G180)", "ore": 1}}, {"settimana": 28, "mese": "Marzo", "aritmetica": {"testo": "Pasqua + lez. 20 PD", "ore": 2}, "geometria": {"testo": "Pasqua", "ore": 1}}, {"settimana": 29, "mese": "Marzo/Aprile", "aritmetica": {"testo": "Pasqua + lez. 20 PD e 21", "ore": 2}, "geometria": {"testo": "Pasqua", "ore": 1}}, {"settimana": 30, "mese": "Aprile", "aritmetica": {"testo": "Lez. 26 P.I.", "ore": 1}, "geometria": {"testo": "Triangoli rettangoli simili (G192)", "ore": 1}}, {"settimana": 31, "mese": "Aprile", "aritmetica": {"testo": "VERIFICA dal 15 al 20/04 + correzione", "ore": 2, "tipo": "verifica"}, "geometria": {"testo": "VERIFICA dal 15 al 20/04 + correzione", "ore": 2, "tipo": "verifica"}}, {"settimana": 32, "mese": "Aprile", "aritmetica": {"testo": "Lez. 39 incognite e termini noti, bilance", "ore": 4}, "geometria": {"testo": null, "ore": null}}, {"settimana": 33, "mese": "Aprile", "aritmetica": {"testo": "Equazioni", "ore": 2}, "geometria": {"testo": "Rette sul piano (lezz. 22-25)", "ore": 2}}, {"settimana": 34, "mese": "Maggio", "aritmetica": {"testo": "Equazioni", "ore": 2}, "geometria": {"testo": "Rette sul piano (lezz. 22-25)", "ore": 2}}, {"settimana": 35, "mese": "Maggio", "aritmetica": {"testo": "Equazioni", "ore": 3}, "geometria": {"testo": "Rette sul piano (lezz. 22-25)", "ore": 1}}, {"settimana": 36, "mese": "Maggio", "aritmetica": {"testo": "VERIFICA dal 20 al 25/05 + correzione", "ore": 2, "tipo": "verifica"}, "geometria": {"testo": "VERIFICA dal 20 al 25/05 + correzione", "ore": 2, "tipo": "verifica"}}, {"settimana": 37, "mese": "Maggio", "aritmetica": {"testo": "Cap. 3 truffe", "ore": 2}, "geometria": {"testo": "Cap. 3 truffe", "ore": 2}}, {"settimana": 38, "mese": "Giugno", "aritmetica": {"testo": "Cap. 3 truffe; THE END", "ore": 2}, "geometria": {"testo": "Cap. 3 truffe; THE END", "ore": 2}}]}, "scienze": {"unita": [{"id": "C-0", "titolo": "Tema C 'per iniziare': dalle cellule agli apparati (la pelle)", "mese": "Ottobre", "lezioni": [{"titolo": "L'organizzazione del corpo umano", "pagine": "C2-C3"}, {"titolo": "Gli organi e gli apparati", "pagine": "C4-C5"}, {"titolo": "Il corpo sano è in equilibrio: l'omeostasi", "pagine": "C6-C7"}]}, {"id": "C-1", "titolo": "Le ossa e i muscoli", "mese": "Ottobre", "lezioni": [{"titolo": "I tessuti delle ossa", "pagine": "C12-C13"}, {"titolo": "Lo scheletro del corpo umano", "pagine": "C14-C17"}, {"titolo": "I tessuti dei muscoli", "pagine": "C18-C19"}, {"titolo": "I muscoli del corpo umano", "pagine": "C20-C21"}, {"titolo": "Le articolazioni", "pagine": "C22-C23"}]}, {"id": "C-3", "titolo": "L'apparato respiratorio + progetto fumo + tabagismo", "mese": "Fine ottobre - metà novembre (17-18 nov tabagismo + CLIL)", "lezioni": [{"titolo": "Il ruolo della respirazione", "pagine": "C62-C63"}, {"titolo": "Le vie respiratorie e i polmoni", "pagine": "C64-C67"}, {"titolo": "La respirazione cellulare", "pagine": "C68-C69"}, {"titolo": "L'inspirazione e l'espirazione", "pagine": "C70-C71"}]}, {"id": "VER-BIO-1", "titolo": "VERIFICA biologia", "tipo": "verifica", "mese": "Novembre"}, {"id": "A-4", "titolo": "Le basi della chimica (tombola)", "mese": "Fine novembre e dicembre", "lezioni": [{"titolo": "Le trasformazioni fisiche e chimiche", "pagine": "A84-A85"}, {"titolo": "Il pH", "pagine": "A120-A121"}, {"titolo": "Gli acidi, le basi e i sali", "pagine": "A118-A119"}, {"titolo": "I miscugli e le soluzioni", "pagine": "A86-A87"}, {"titolo": "La struttura dell'atomo", "pagine": "A88-A91"}, {"titolo": "La tavola periodica", "pagine": "A92-A95"}, {"titolo": "I legami chimici", "pagine": "A96-A99"}]}, {"id": "VER-CHI-1", "titolo": "VERIFICA chimica", "tipo": "verifica", "mese": "Dicembre"}, {"id": "A-5", "titolo": "Le reazioni chimiche", "mese": "Gennaio", "lezioni": [{"titolo": "Le leggi delle reazioni chimiche", "pagine": "A110-A113"}, {"titolo": "Energia e velocità delle reazioni", "pagine": "A114-A115"}, {"titolo": "Gli ossidi, le anidridi e le combustioni", "pagine": "A116-A117"}]}, {"id": "C-4", "titolo": "L'apparato circolatorio e l'immunità (AVIS + laboratori)", "mese": "Febbraio", "lezioni": [{"titolo": "L'apparato circolatorio e il sangue", "pagine": "C84-C87"}, {"titolo": "Il cuore", "pagine": "C88-C89"}, {"titolo": "I vasi sanguigni", "pagine": "C90-C91"}, {"titolo": "La grande e la piccola circolazione", "pagine": "C92-C93"}, {"titolo": "La linfa", "pagine": "C94-C95", "barrato": true}, {"titolo": "Le difese immunitarie", "pagine": "C96-C99", "barrato": true}, {"titolo": "I gruppi sanguigni", "pagine": "C100-C102"}, {"titolo": "Malattie, prevenzione: vaccini e antibiotici", "pagine": null}]}, {"id": "C-2", "titolo": "L'apparato digerente + ed. civica + collegamento con ed. fisica e tecnologia (UDA)", "mese": "Marzo", "lezioni": [{"titolo": "Il ruolo dell'alimentazione", "pagine": "C36-C37", "barrato": true, "nota": "ed. fisica"}, {"titolo": "I principi nutritivi e la dieta", "pagine": "C38-C41", "barrato": true, "nota": "ed. fisica"}, {"titolo": "La digestione e la nutrizione", "pagine": "C42-C43", "barrato": true, "nota": "ed. fisica"}, {"titolo": "Nella bocca: la lingua e i denti", "pagine": "C44-C45"}, {"titolo": "Dalla bocca allo stomaco", "pagine": "C46-C47"}, {"titolo": "L'intestino: digestione, assorbimento ed eliminazione", "pagine": "C48-C49"}, {"titolo": "Struttura chimica di carboidrati, lipidi, proteine, amido (esperimenti soprattutto)", "pagine": "A138-A146, A146-A147, C50-C51", "nota": "riferimento nel piano con '(???)'"}], "compito_di_realta": true}, {"id": "VER-BIO-2", "titolo": "VERIFICA biologia", "tipo": "verifica", "mese": "Marzo"}, {"id": "A-7", "titolo": "Il movimento e l'equilibrio", "mese": "Aprile - maggio", "lezioni": [{"titolo": "La velocità", "pagine": "A158"}, {"titolo": "Le forze", "pagine": "A162-A163"}, {"titolo": "Il baricentro e l'equilibrio", "pagine": "A164-A165"}, {"titolo": "La leva", "pagine": "A166-A169"}, {"titolo": "Collegamenti con la proporzionalità diretta", "pagine": null}]}, {"id": "VER-FIS-1", "titolo": "VERIFICA fisica", "tipo": "verifica", "mese": "Maggio"}]}};
+
     const defaultData = {
       classi: {},
       extracted: {},
       registro: {},
       lavagna: {},
+      programmazione: {},
       created: new Date().toISOString()
     };
 
@@ -1232,6 +1236,12 @@
                 Alla lavagna
               </button>
               <button 
+                className={tab === 'programmazione' ? 'on' : ''}
+                onClick={() => setTab('programmazione')}
+              >
+                Programmazione
+              </button>
+              <button 
                 className={tab === 'backup' ? 'on' : ''}
                 onClick={() => setTab('backup')}
               >
@@ -1244,6 +1254,7 @@
             {tab === 'gruppi' && <GruppiTab data={data} saveData={saveData} />}
             {tab === 'registro' && <RegistroTab data={data} saveData={saveData} />}
             {tab === 'lavagna' && <LavagnaTab data={data} saveData={saveData} />}
+            {tab === 'programmazione' && <ProgrammazioneTab data={data} saveData={saveData} />}
             {tab === 'backup' && <BackupTab data={data} saveData={saveData} />}
           </main>
         </>
@@ -2383,6 +2394,146 @@
     }
 
     // BACKUP TAB
+    // ---------- Programmazione (piano annuale seconde) ----------
+    const ORARIO_SECONDA = {
+      1: { materia: 'scienze', ore: 1 },
+      2: { materia: 'geometria', ore: 1 },
+      3: { materia: 'scienze', ore: 1 },
+      4: { materia: 'aritmetica', ore: 2 },
+      5: { materia: 'geometria', ore: 1 }
+    };
+    const GIORNI_IT = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
+    const MATERIE_PROG = { aritmetica: 'Aritmetica', geometria: 'Geometria', scienze: 'Scienze' };
+
+    // Sequenze lezione per lezione, costruite dal piano annuale
+    const buildSeqProg = () => {
+      const seq = { aritmetica: [], geometria: [], scienze: [] };
+      PIANO_SECONDE.matematica.settimane.forEach(w => {
+        ['aritmetica', 'geometria'].forEach(m => {
+          const c = w[m];
+          if (!c || !c.testo || c.tipo === 'vacanza' || c.tipo === 'stop') return;
+          seq[m].push({ id: m[0] + '-' + w.settimana, settimana: w.settimana, mese: w.mese, testo: c.testo, tipo: c.tipo || 'lezione' });
+        });
+      });
+      PIANO_SECONDE.scienze.unita.forEach(u => {
+        if (u.tipo === 'verifica') {
+          seq.scienze.push({ id: u.id, unita: u.titolo, testo: u.titolo, mese: u.mese, tipo: 'verifica' });
+          return;
+        }
+        (u.lezioni || []).forEach((l, i) => {
+          if (l.barrato) return; // lezioni barrate nel piano: saltate
+          seq.scienze.push({ id: u.id + '-' + i, unita: u.titolo, testo: l.titolo, pagine: l.pagine, mese: u.mese, tipo: 'lezione' });
+        });
+      });
+      return seq;
+    };
+    const SEQ_PROG = buildSeqProg();
+
+    // Punto di partenza: settimana attuale del piano (7 = verifica 26/10-3/11)
+    const cursoreIniziale = (m) => {
+      const s = SEQ_PROG[m];
+      if (m === 'scienze') return Math.max(0, s.findIndex(x => x.mese === 'Ottobre'));
+      const i = s.findIndex(x => parseInt(x.settimana, 10) >= 7);
+      return i < 0 ? 0 : i;
+    };
+
+    function CursorePiano({ materia, cur, setCur }) {
+      const seq = SEQ_PROG[materia];
+      const item = seq[cur];
+      return (
+        <div className="card">
+          <div className="card-header"><strong>{MATERIE_PROG[materia]}</strong></div>
+          {item ? (
+            <>
+              <div className="hint">
+                {item.settimana != null ? 'Settimana ' + item.settimana + ' · ' + item.mese : item.unita + ' · ' + item.mese}
+                {item.tipo === 'verifica' ? ' · VERIFICA' : ''}
+              </div>
+              <div style={{ fontWeight: 600, marginTop: 4 }}>{item.testo}</div>
+              {item.pagine && <div className="hint">Pag. {item.pagine}</div>}
+            </>
+          ) : (
+            <div className="hint">Piano completato.</div>
+          )}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+            <button className="btn ghost" disabled={cur <= 0} onClick={() => setCur(materia, cur - 1)}>← Indietro</button>
+            <button className="btn" onClick={() => setCur(materia, cur + 1)}>Fatto, avanti →</button>
+          </div>
+          <select value={cur} onChange={e => setCur(materia, parseInt(e.target.value, 10))} style={{ marginTop: 8, width: '100%' }}>
+            {seq.map((x, i) => (
+              <option key={x.id + '-' + i} value={i}>
+                {(x.settimana != null ? 'S' + x.settimana + ' · ' : '') + x.testo.slice(0, 60)}
+              </option>
+            ))}
+          </select>
+        </div>
+      );
+    }
+
+    function ProgrammazioneTab({ data, saveData }) {
+      const oggi = new Date();
+      const prog = data.programmazione || {};
+      const salvati = prog.cursori || {};
+      const cur = (m) => (salvati[m] != null ? salvati[m] : cursoreIniziale(m));
+      const setCur = (m, idx) => {
+        const v = Math.max(0, Math.min(SEQ_PROG[m].length, idx));
+        const nuovi = {
+          aritmetica: cur('aritmetica'),
+          geometria: cur('geometria'),
+          scienze: cur('scienze'),
+          [m]: v
+        };
+        saveData({ ...data, programmazione: { ...prog, cursori: nuovi } });
+      };
+
+      // Prossime 14 giorni: ogni sessione prende la lezione successiva della sua materia
+      const contatore = { aritmetica: cur('aritmetica'), geometria: cur('geometria'), scienze: cur('scienze') };
+      const prossime = [];
+      for (let k = 0; k < 14; k++) {
+        const d = new Date(oggi.getFullYear(), oggi.getMonth(), oggi.getDate() + k);
+        const slot = ORARIO_SECONDA[d.getDay()];
+        if (!slot) continue;
+        const idx = contatore[slot.materia]++;
+        prossime.push({ k, data: d, materia: slot.materia, ore: slot.ore, item: SEQ_PROG[slot.materia][idx] });
+      }
+
+      const slotOggi = ORARIO_SECONDA[oggi.getDay()];
+      const prossimaSessione = prossime.find(p => p.k > 0);
+
+      return (
+        <div className="sec-wrap">
+          <div className="sec">Oggi · {GIORNI_IT[oggi.getDay()]} {oggi.toLocaleDateString('it-IT')}</div>
+          {slotOggi ? (
+            <p className="hint">
+              Seconda: {MATERIE_PROG[slotOggi.materia]}, {slotOggi.ore} {slotOggi.ore > 1 ? 'ore' : 'ora'}.
+            </p>
+          ) : (
+            <p className="hint">
+              Oggi non c'è lezione di seconda.
+              {prossimaSessione && ' Prossima: ' + GIORNI_IT[prossimaSessione.data.getDay()] + ' (' + MATERIE_PROG[prossimaSessione.materia] + ').'}
+            </p>
+          )}
+
+          <div className="sec">Cursori</div>
+          {['aritmetica', 'geometria', 'scienze'].map(m => (
+            <CursorePiano key={m} materia={m} cur={cur(m)} setCur={setCur} />
+          ))}
+
+          <div className="sec">Prossime sessioni</div>
+          {prossime.length === 0 && <p className="empty">Nessuna sessione nei prossimi 14 giorni.</p>}
+          {prossime.map((p, i) => (
+            <div key={i} className="card" style={{ marginBottom: 8 }}>
+              <div className="hint">
+                {p.k === 0 ? 'Oggi · ' : ''}{GIORNI_IT[p.data.getDay()]} {p.data.toLocaleDateString('it-IT')} · {MATERIE_PROG[p.materia]} {p.ore}h
+              </div>
+              <div>{p.item ? p.item.testo : 'Piano completato'}</div>
+            </div>
+          ))}
+          <p className="hint">Le lezioni barrate nel piano di scienze sono saltate. Il cursore avanza solo a mano.</p>
+        </div>
+      );
+    }
+
     function BackupTab({ data, saveData }) {
       const [msg, setMsg] = useState(null);
 
